@@ -136,5 +136,36 @@ $$
     $$ language plpgsql;
 
 select * from sp_sum_movies();
+                                          
+                                          -- use PERFORM instead of SELECT for procedures (select inly possible in functions) !!!!
+
+
+-- upsert: try to insert, if exists them update only
+create or replace function sp_upsert_new_movies(_title text, _release_date timestamp, _country_id bigint, _price double precision) returns bigint
+language plpgsql
+    AS
+    $$
+    DECLARE
+        record_id bigint;
+    BEGIN
+        SELECT movies.id into record_id from movies
+            where movies.title = _title;
+        if not found THEN
+            INSERT INTO movies(title, release_date, price, country_id) values (_title, _release_date, _price, _country_id)
+            returning id into record_id;
+        ELSE
+            update movies
+                set release_date = _release_date, country_id = _country_id, price = _price
+            where movies.id = record_id;
+        end if;
+        return record_id;
+    end;
+    $$;
+
+select * from sp_upsert_new_movies('Greek wedding', '2010-01-19', 1, 85.1);
+select * from sp_upsert_new_movies('Mandalorien', '2019-03-20', 2, 37.3);
+select * from movies;
+
+
 
 
