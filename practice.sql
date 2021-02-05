@@ -166,6 +166,23 @@ select * from sp_upsert_new_movies('Greek wedding', '2010-01-19', 1, 85.1);
 select * from sp_upsert_new_movies('Mandalorien', '2019-03-20', 2, 37.3);
 select * from movies;
 
+CREATE OR REPLACE FUNCTION sp_div(x integer, y integer) returns double precision
+language plpgsql AS
+    $$
+        DECLARE
+            result double precision := 0;
+        BEGIN
+            if y > 0 THEN
+                RAISE division_by_zero ;
+            end if;
+            return result;
+            EXCEPTION
+                when division_by_zero THEN
+                    RAISE NOTICE 'caught division by zero';
+                    return null;
+        end;
+    $$;
 
+select * from sp_div(1, 100);
 
 
