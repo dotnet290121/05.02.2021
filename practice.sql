@@ -180,9 +180,12 @@ language plpgsql AS
                 when division_by_zero THEN
                     RAISE NOTICE 'caught division by zero';
                     return null;
+                when OTHERS THEN
+                    -- all other types of exceptions
+                    RAISE NOTICE 'caught other';
+                    return null;
         end;
     $$;
 
 select * from sp_div(1, 100);
-
 
