@@ -70,4 +70,36 @@ language plpgsql
 
 select * from sp_insert_new_movies('Greek wedding', '2010-01-19', 1, 70.1);
 
+CREATE OR REPLACE FUNCTION a_sp_get_movies_in_middle()
+returns TABLE(id bigint, title text, release_date timestamp, price double precision, country_id bigint, c_id bigint, country_name text) AS
+    $$
+    DECLARE
+        --cheapest_movie_id bigint;
+        --expensive_movie_id bigint;
+    BEGIN
+        RETURN QUERY
+            -- with field 1 ...
+            WITH cheapest_movie_id AS
+                (
+                    select * from movies
+                    where movies.price = (select (min(movies.price)) from movies)
+                    limit 1
+                ),
+            -- with field 2 ...
+            expensive_movie_id AS
+                (
+                    select * from movies
+                    where movies.price = (select (max(movies.price)) from movies)
+                    limit 1
+                )
+            -- query 1
+                 select * from movies m
+                join country c on m.country_id = c.id
+                where m.id != (select cheapest_movie_id.id from cheapest_movie_id) AND m.id != (select expensive_movie_id.id from expensive_movie_id);
+    END;
+$$ LANGUAGE plpgsql;
+
+select * from a_sp_get_movies_in_middle();
+
+
 
