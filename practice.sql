@@ -116,19 +116,19 @@ select * from random();
 
 select * from sp_generate_rnd(40);
 
-CREATE OR REPLACE FUNCTION sp_sum_movies() -- 1-max
+CREATE OR REPLACE FUNCTION sp_sum_movies() 
 returns integer AS
 
 $$
     declare
         sum double precision := 0;
         movie_price double precision := 0.0;
-        movie_id int := 0;
     BEGIN
         FOR i IN 1..(select max(id) from movies)
         loop
-            if exists(select * into movie_price from movies where movies.id = i) then
-                sum := sum + (select movies.price from movies where movies.id = i);
+            select movies.price into movie_price from movies where movies.id = i;
+            if found then
+                sum := sum + movie_price;
             end if;
         end loop;
         return sum;
@@ -136,4 +136,5 @@ $$
     $$ language plpgsql;
 
 select * from sp_sum_movies();
+
 
