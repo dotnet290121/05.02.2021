@@ -100,6 +100,40 @@ returns TABLE(id bigint, title text, release_date timestamp, price double precis
 $$ LANGUAGE plpgsql;
 
 select * from a_sp_get_movies_in_middle();
+                                          
+                                          
 
+CREATE OR REPLACE FUNCTION sp_generate_rnd(_max integer) -- 1-max
+returns integer AS
 
+$$
+    BEGIN
+            return (random() * (_max-1) + 1);
+end;
+    $$ language plpgsql;
+
+select * from random();
+
+select * from sp_generate_rnd(40);
+
+CREATE OR REPLACE FUNCTION sp_sum_movies() -- 1-max
+returns integer AS
+
+$$
+    declare
+        sum double precision := 0;
+        movie_price double precision := 0.0;
+        movie_id int := 0;
+    BEGIN
+        FOR i IN 1..(select max(id) from movies)
+        loop
+            if exists(select * into movie_price from movies where movies.id = i) then
+                sum := sum + (select movies.price from movies where movies.id = i);
+            end if;
+        end loop;
+        return sum;
+    end;
+    $$ language plpgsql;
+
+select * from sp_sum_movies();
 
