@@ -189,3 +189,27 @@ language plpgsql AS
 
 select * from sp_div(1, 100);
 
+create table grades
+(
+	id bigserial
+		constraint grades_pk
+			primary key,
+	class_id bigint not null,
+	student_id bigint not null,
+	grade double precision default 0 not null
+);
+
+select count(*), class_id from grades
+group by class_id;
+
+select *,
+       row_number() over (partition by student_id) row_num
+       from grades;
+
+select *, grade - avg(grade) over (partition by class_id) diff_from_class_avg , avg(grade) over (partition by class_id)  class_avg
+       from grades;
+
+select *, price - avg(price) over (partition by country_id) diff
+       from movies
+    order by country_id;
+
